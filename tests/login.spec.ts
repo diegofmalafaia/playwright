@@ -1,36 +1,28 @@
 import { test, expect, selectors } from '@playwright/test';
+import {LoginPage} from "../pages/loginPage";
 
 test('has title', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveTitle(/Swag Labs/);
+  const loginPage = new LoginPage(page);
+  await loginPage.verifyLoginTitle();
 });
 
 test('login with success', async ({ page }) => {
-  await page.goto('/');
-
-  await page.locator('[data-test="username"]').fill('standard_user') ;
-  await page.locator('[data-test="password"]').fill('secret_sauce');
-  await page.locator('[data-test="login-button"]').click();
-
-  await expect(page.getByText('Products')).toBeInViewport();
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
+  await loginPage.login('standard_user', 'secret_sauce');
+  await loginPage.verifySuccessfulLogin();
 });
 
 test('login with wrong password', async ({ page }) => {
-  await page.goto('/');
-
-  await page.locator('[data-test="username"]').fill('standard_user') ;
-  await page.locator('[data-test="password"]').fill('wrong_password');
-  await page.locator('[data-test="login-button"]').click();
-
-  await expect(page.locator('[data-test="error"]')).toHaveText('Epic sadface: Username and password do not match any user in this service');
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
+  await loginPage.login('standard_user', 'wrong_password');
+  await loginPage.verifyWrongPasswordError();
 });
 
 test('login with locked out user', async ({ page }) => {
-  await page.goto('/');
-
-  await page.locator('[data-test="username"]').fill('locked_out_user') ;
-  await page.locator('[data-test="password"]').fill('secret_sauce');
-  await page.locator('[data-test="login-button"]').click();
-
-  await expect(page.locator('[data-test="error"]')).toHaveText('Epic sadface: Sorry, this user has been locked out.');
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
+  await loginPage.login('locked_out_user', 'secret_sauce');
+  await loginPage.verifyLockedOutUserError();
 });
